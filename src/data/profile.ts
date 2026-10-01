@@ -36,7 +36,9 @@ export const profile = {
    * { label: 'Threads',   url: 'https://www.threads.com/@...' },
    * { label: 'LinkedIn',  url: 'https://www.linkedin.com/in/...' },
    */
-  links: [] as OfficialLink[],
+  links: [
+    { label: 'Instagram', url: 'https://www.instagram.com/jay.jeongho/' },
+  ] as OfficialLink[],
 };
 
 /** https URL 이 채워진 링크만 공개 화면에 사용합니다. */
