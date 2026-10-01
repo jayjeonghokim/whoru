@@ -106,7 +106,8 @@ npm run preview
 ### 처음 한 번만 (GitHub 웹에서)
 
 1. 저장소 **Settings → Pages → Build and deployment → Source** 를 **GitHub Actions** 로 선택합니다.
-2. 기본 브랜치(`main`)에 코드를 반영하면 배포가 시작됩니다.
+2. 기본 브랜치에 코드를 반영하면 배포가 시작됩니다. `deploy.yml` 은 `main` 푸시에 반응하므로, 기본 브랜치 이름이 `main` 이 아니면
+   `on.push.branches` 를 맞추거나 **Actions → Build & Deploy → Run workflow** 로 직접 실행하세요. (배포는 항상 기본 브랜치에서만 됩니다.)
    주소는 `https://<GitHub 사용자명>.github.io/<저장소 이름>/` 입니다.
 
 이 단계에서는 `SITE_MODE=preview` 라서 **noindex** 상태로 올라갑니다.
