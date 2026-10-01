@@ -1,0 +1,79 @@
+---
+import { render } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { displayName, isHttpsUrl, profile } from '../../data/profile';
+import { formatDate, isoDate } from '../../lib/date';
+import { blogPostingNode, webPageNode } from '../../lib/jsonld';
+import { getPosts } from '../../lib/log';
+import { withBase } from '../../lib/url';
+
+export async function getStaticPaths() {
+  const posts = await getPosts();
+  return posts.map((post) => ({ params: { slug: post.id }, props: { post } }));
+}
+
+const { post } = Astro.props;
+const { Content } = await render(post);
+const { title, description, publishedAt, updatedAt, tags, sourceThreadUrl, draft } = post.data;
+
+const path = `/log/${post.id}/`;
+const pageTitle = `${title} | ${profile.logName}`;
+const published = isoDate(publishedAt);
+const updated = updatedAt ? isoDate(updatedAt) : undefined;
+---
+
+<BaseLayout
+  title={pageTitle}
+  description={description}
+  path={path}
+  type="article"
+  publishedAt={published}
+  updatedAt={updated}
+  jsonLd={[
+    webPageNode({ path, title: pageTitle, description }),
+    blogPostingNode({ path, title, description, publishedAt: published, updatedAt: updated, tags }),
+  ]}
+>
+  <article>
+    <header class="article-header">
+      <p class="meta">
+        <a href={withBase('/log/')}>{profile.logName}</a>
+        {draft && <span class="badge">초안 · 개발 서버에서만 보임</span>}
+      </p>
+      <h1>{title}</h1>
+      <p class="meta">
+        <span>{displayName}</span>
+        <span aria-hidden="true">·</span>
+        <time datetime={published}>{formatDate(publishedAt)}</time>
+        {
+          updated && (
+            <>
+              <span aria-hidden="true">·</span>
+              <span>
+                수정 <time datetime={updated}>{formatDate(updatedAt!)}</time>
+              </span>
+            </>
+          )
+        }
+      </p>
+    </header>
+
+    <div class="prose">
+      <Content />
+    </div>
+
+    <footer class="article-footer">
+      {tags.length > 0 && (
+        <ul class="chips" aria-label="태그">
+          {tags.map((tag) => <li>{tag}</li>)}
+        </ul>
+      )}
+      {isHttpsUrl(sourceThreadUrl) && (
+        <p>
+          이 글은 <a href={sourceThreadUrl} rel="noopener">Threads 기록</a>에서 시작했습니다.
+        </p>
+      )}
+      <p><a href={withBase('/log/')}>← {profile.logName} 목록</a></p>
+    </footer>
+  </article>
+</BaseLayout>

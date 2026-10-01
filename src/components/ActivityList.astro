@@ -1,0 +1,33 @@
+---
+import type { ActivityItem } from '../data/types';
+import { isHttpsUrl } from '../data/profile';
+
+interface Props {
+  heading: string;
+  items: ActivityItem[];
+}
+const { heading, items } = Astro.props;
+---
+
+{
+  items.length > 0 && (
+    <section class="section" aria-labelledby={`h-${heading}`}>
+      <h2 id={`h-${heading}`}>{heading}</h2>
+      <ul class="activity-list">
+        {items.map((item) => (
+          <li>
+            <p class="activity-period">{item.period}</p>
+            <h3>{item.title}</h3>
+            <p class="activity-role">{item.role}</p>
+            {item.summary && <p>{item.summary}</p>}
+            {isHttpsUrl(item.sourceUrl) && (
+              <p>
+                <a href={item.sourceUrl} rel="noopener">근거 링크</a>
+              </p>
+            )}
+          </li>
+        ))}
+      </ul>
+    </section>
+  )
+}

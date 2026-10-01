@@ -1,0 +1,20 @@
+---
+import { officialLinks } from '../data/profile';
+---
+
+{
+  officialLinks.length > 0 && (
+    <section class="section" aria-labelledby="h-links">
+      <h2 id="h-links">공식 링크</h2>
+      <ul class="inline-links">
+        {officialLinks.map((link) => (
+          <li>
+            <a href={link.url} rel="me noopener">
+              {link.label}
+            </a>
+          </li>
+        ))}
+      </ul>
+    </section>
+  )
+}

@@ -1,0 +1,72 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import ActivityList from '../components/ActivityList.astro';
+import LinkList from '../components/LinkList.astro';
+import PostList from '../components/PostList.astro';
+import { displayName, profile } from '../data/profile';
+import { experience } from '../data/experience';
+import { projects } from '../data/projects';
+import { webPageNode } from '../lib/jsonld';
+import { getPosts } from '../lib/log';
+import { withBase } from '../lib/url';
+
+const path = '/';
+const recent = (await getPosts()).slice(0, 3);
+---
+
+<BaseLayout
+  title={displayName}
+  description={profile.tagline}
+  path={path}
+  jsonLd={[webPageNode({ path, title: displayName, description: profile.tagline, aboutPerson: true })]}
+>
+  <section class="hero">
+    <h1>
+      {profile.nameKo}
+      <span class="name-en" lang="en">{profile.nameEn}</span>
+    </h1>
+    <p class="lede">{profile.tagline}</p>
+    <p class="lede-en" lang="en">{profile.taglineEn}</p>
+  </section>
+
+  {
+    profile.bio.length > 0 && (
+      <section class="section" aria-labelledby="h-about">
+        <h2 id="h-about">소개</h2>
+        {profile.bio.map((paragraph) => (
+          <p>{paragraph}</p>
+        ))}
+      </section>
+    )
+  }
+
+  {
+    profile.interests.length > 0 && (
+      <section class="section" aria-labelledby="h-interests">
+        <h2 id="h-interests">관심 분야</h2>
+        <ul class="chips">
+          {profile.interests.map((interest) => (
+            <li>{interest}</li>
+          ))}
+        </ul>
+      </section>
+    )
+  }
+
+  <ActivityList heading="경력" items={experience} />
+  <ActivityList heading="프로젝트" items={projects} />
+
+  {
+    recent.length > 0 && (
+      <section class="section" aria-labelledby="h-recent">
+        <h2 id="h-recent">최근 글</h2>
+        <PostList posts={recent} />
+        <p class="more">
+          <a href={withBase('/log/')}>{profile.logName} 전체 보기</a>
+        </p>
+      </section>
+    )
+  }
+
+  <LinkList />
+</BaseLayout>

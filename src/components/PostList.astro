@@ -1,0 +1,27 @@
+---
+import { formatDate, isoDate } from '../lib/date';
+import { withBase } from '../lib/url';
+import type { Post } from '../lib/log';
+
+interface Props {
+  posts: Post[];
+}
+const { posts } = Astro.props;
+---
+
+<ul class="post-list">
+  {
+    posts.map((post) => (
+      <li>
+        <p class="meta">
+          <time datetime={isoDate(post.data.publishedAt)}>{formatDate(post.data.publishedAt)}</time>
+          {post.data.draft && <span class="badge">초안 · 개발 서버에서만 보임</span>}
+        </p>
+        <h3>
+          <a href={withBase(`/log/${post.id}/`)}>{post.data.title}</a>
+        </h3>
+        <p>{post.data.description}</p>
+      </li>
+    ))
+  }
+</ul>

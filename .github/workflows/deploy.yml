@@ -1,0 +1,59 @@
+name: Build & Deploy
+
+# PR 과 push 에서는 항상 check → build → verify 를 실행합니다.
+# 기본(default) 브랜치에서만 GitHub Pages 로 배포합니다.
+#
+# 저장소 변수(Settings → Secrets and variables → Actions → Variables)로 동작을 바꿉니다.
+#   SITE_MODE  preview(기본) | public   — public 이어야 검색 색인을 허용합니다.
+#   SITE_URL   기본값 https://<소유자>.github.io, 커스텀 도메인이면 https://내도메인
+#   BASE_PATH  기본값 /<저장소 이름>,       커스텀 도메인이나 <소유자>.github.io 저장소면 /
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      ASTRO_TELEMETRY_DISABLED: '1'
+      SITE_MODE: ${{ vars.SITE_MODE || 'preview' }}
+      SITE_URL: ${{ vars.SITE_URL || format('https://{0}.github.io', github.repository_owner) }}
+      BASE_PATH: ${{ vars.BASE_PATH || format('/{0}', github.event.repository.name) }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - run: npm run check
+      - run: npm run build
+      - run: npm run verify
+      - uses: actions/upload-pages-artifact@v3
+        if: github.ref_name == github.event.repository.default_branch && github.event_name != 'pull_request'
+        with:
+          path: dist
+
+  deploy:
+    needs: build
+    if: github.ref_name == github.event.repository.default_branch && github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

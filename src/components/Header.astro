@@ -1,0 +1,19 @@
+---
+import { profile } from '../data/profile';
+import { withBase } from '../lib/url';
+
+interface Props {
+  currentPath: string;
+}
+const { currentPath } = Astro.props;
+const inLog = currentPath.startsWith('/log/');
+---
+
+<header class="site-header">
+  <div class="wrap header-inner">
+    <a class="wordmark" href={withBase('/')}>{profile.wordmark}</a>
+    <nav aria-label="주요 메뉴">
+      <a class="nav-link" href={withBase('/log/')} aria-current={inLog ? 'page' : undefined}>{profile.logName}</a>
+    </nav>
+  </div>
+</header>

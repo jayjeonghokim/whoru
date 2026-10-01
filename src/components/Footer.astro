@@ -1,0 +1,24 @@
+---
+import { displayName, officialLinks } from '../data/profile';
+
+const year = new Date().getFullYear();
+---
+
+<footer class="site-footer">
+  <div class="wrap footer-inner">
+    <p>© {year} {displayName}</p>
+    {
+      officialLinks.length > 0 && (
+        <ul class="inline-links" aria-label="공식 링크">
+          {officialLinks.map((link) => (
+            <li>
+              <a href={link.url} rel="me noopener">
+                {link.label}
+              </a>
+            </li>
+          ))}
+        </ul>
+      )
+    }
+  </div>
+</footer>

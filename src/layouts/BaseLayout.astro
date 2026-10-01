@@ -1,0 +1,61 @@
+---
+import '../styles/global.css';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import { isPublic } from '../../site.config.mjs';
+import { displayName } from '../data/profile';
+import { personNode, serializeGraph, websiteNode } from '../lib/jsonld';
+import { absoluteUrl, withBase } from '../lib/url';
+
+interface Props {
+  /** <title> 과 og:title */
+  title: string;
+  description: string;
+  /** 이 페이지의 내부 경로. 예) "/log/" */
+  path: string;
+  type?: 'website' | 'article';
+  /** 페이지별 JSON-LD 노드. Person 과 WebSite 는 자동으로 포함됩니다. */
+  jsonLd?: object[];
+  publishedAt?: string;
+  updatedAt?: string;
+  /** 색인에서 제외할 페이지(404 등) */
+  noindex?: boolean;
+}
+
+const { title, description, path, type = 'website', jsonLd = [], publishedAt, updatedAt, noindex = false } = Astro.props;
+
+const pageUrl = absoluteUrl(path);
+const robots = !isPublic || noindex ? 'noindex, nofollow' : undefined;
+const graph = serializeGraph([personNode(), websiteNode(), ...jsonLd]);
+---
+
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    {robots && <meta name="robots" content={robots} />}
+    {/* canonical 은 공개 주소가 확정된 공개 모드에서만 출력합니다. */}
+    {isPublic && !noindex && <link rel="canonical" href={pageUrl} />}
+    <link rel="icon" href={withBase('/favicon.svg')} type="image/svg+xml" />
+    <meta property="og:site_name" content={displayName} />
+    <meta property="og:locale" content="ko_KR" />
+    <meta property="og:type" content={type} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    {isPublic && <meta property="og:url" content={pageUrl} />}
+    {type === 'article' && publishedAt && <meta property="article:published_time" content={publishedAt} />}
+    {type === 'article' && updatedAt && <meta property="article:modified_time" content={updatedAt} />}
+    <script type="application/ld+json" set:html={graph} />
+  </head>
+  <body>
+    <a class="skip-link" href="#main">본문으로 건너뛰기</a>
+    <Header currentPath={path} />
+    <main id="main" class="page">
+      <slot />
+    </main>
+    <Footer />
+  </body>
+</html>

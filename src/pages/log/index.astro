@@ -1,0 +1,27 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PostList from '../../components/PostList.astro';
+import { displayName, profile } from '../../data/profile';
+import { webPageNode } from '../../lib/jsonld';
+import { getPosts } from '../../lib/log';
+
+const path = '/log/';
+const title = `${profile.logName} | ${displayName}`;
+const description = `${displayName}의 기록. ${profile.taglineEn}`;
+const posts = await getPosts();
+---
+
+<BaseLayout title={title} description={description} path={path} jsonLd={[webPageNode({ path, title, description })]}>
+  <section class="hero hero-compact">
+    <h1>{profile.logName}</h1>
+    <p class="lede">{profile.tagline}</p>
+  </section>
+
+  {
+    posts.length > 0 ? (
+      <PostList posts={posts} />
+    ) : (
+      <p class="empty">아직 공개한 글이 없습니다. 첫 기록을 준비하고 있습니다.</p>
+    )
+  }
+</BaseLayout>
